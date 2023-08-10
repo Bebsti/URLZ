@@ -29,7 +29,7 @@ async def link_handler(bot, message):
     try:
         short_link = await get_shortlink(link)
         await message.reply(
-            f'Here is your [Short Link]({short_link})',
+            f'Here is your Short Link: {short_link}',
             quote=True,
             disable_web_page_preview=True
         )
@@ -37,12 +37,15 @@ async def link_handler(bot, message):
         await message.reply(f'Error: {e}', quote=True)
 
 async def get_shortlink(link):
-    url = f'https://cpm.link/api/?api={API_KEY}&url={link}&alias&ct=1'
+    url = f'https://cpm.link/api/?api={API_KEY}&url={link}&ct=1'
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, raise_for_status=True) as response:
             data = await response.json()
-            return data["shortenedUrl"]
+            if data["status"] == "success":
+                return data["shortenedUrl"]
+            else:
+                raise Exception("URL shortening failed")
 
 if __name__ == '__main__':
     bot.run()
